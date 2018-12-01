@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 import pytz
@@ -24,3 +25,18 @@ def current_day(now):
         raise Exception("must be December")
 
     return min(now.day, 25)
+
+
+def get_session_cookie():
+    cookie = os.environ.get("AOC_SESSION_COOKIE")
+    if cookie is not None:
+        return cookie
+    try:
+        with open(CONFIG_FNAME) as f:
+            cookie = f.read().strip()
+    except (OSError, IOError) as err:
+        pass
+    if cookie:
+        return cookie
+
+    raise Exception("unable to get AOC session cookie")
