@@ -5,6 +5,8 @@ import webbrowser
 import requests
 from bs4 import BeautifulSoup
 
+from aocpy.utils import current_day, current_year
+
 logger = logging.getLogger(__name__)
 
 URL = "https://adventofcode.com/{year}/day/{day}"
@@ -36,6 +38,14 @@ class Puzzle:
 
     def browse(self):
         webbrowser.open(self.url)
+
+    @staticmethod
+    def today(session_cookie):
+        """ Create a Puzzle instance for the current day.
+        """
+        year = current_year()
+        day = current_day()
+        return Puzzle(year, day, session_cookie)
 
     @property
     def puzzle_input(self):
