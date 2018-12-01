@@ -4,7 +4,7 @@ from datetime import datetime
 import pytz
 
 AOC_TZ = pytz.timezone("America/New_York")
-CONFIG_FNAME = os.path.expanduser("~/.config/aocd/token")
+CONFIG_DIRNAME = os.path.expanduser("~/.config/aocpy")
 
 
 def current_year():
@@ -32,7 +32,7 @@ def get_session_cookie():
     if cookie is not None:
         return cookie
     try:
-        with open(CONFIG_FNAME) as f:
+        with open(os.path.join(CONFIG_DIRNAME, "token")) as f:
             cookie = f.read().strip()
     except (OSError, IOError) as err:
         pass
