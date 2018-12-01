@@ -9,6 +9,7 @@ def init_day(p: Puzzle):
     click.echo(f"Initialising {p.year}, day {p.day:02} puzzle...")
     generate_day(p)
     click.echo("Opening puzzle page in browser...")
+    p.browse()
 
 
 @click.group()
