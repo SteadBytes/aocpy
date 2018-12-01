@@ -15,7 +15,7 @@ def current_year():
     return year - 1 if now.month < 12 else year
 
 
-def current_day(now):
+def current_day():
     """ Returns the current day number
 
     Raises Exception if not currently December
