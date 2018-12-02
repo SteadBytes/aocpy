@@ -5,7 +5,7 @@ from aocpy.puzzle import Puzzle
 from aocpy.utils import current_day, current_year, get_session_cookie
 
 
-def init_day(p: Puzzle):
+def begin_day(p: Puzzle):
     click.echo(f"Initialising {p.year}, day {p.day:02} puzzle...")
     generate_day(p)
     click.echo("Opening puzzle page in browser...")
@@ -18,6 +18,8 @@ def cli():
 
 
 @cli.command()
+@click.option("-y", "--year", default=current_year, type=click.INT)
+@click.option("-d", "--day", default=current_day, type=click.IntRange(1, 25))
 @click.option(
     "-c",
     "--session-cookie",
@@ -25,9 +27,9 @@ def cli():
     type=click.STRING,
     envvar="AOC_SESSION_COOKIE",
 )
-def today(session_cookie):
-    p = Puzzle.today(session_cookie)
-    init_day(p)
+def begin(year, day, session_cookie):
+    p = Puzzle(year, day, session_cookie)
+    begin_day(p)
 
 
 @cli.command()
