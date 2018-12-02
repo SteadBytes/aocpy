@@ -8,13 +8,27 @@ Fetch input, submit answers and generate boilerplate files for solving Advent of
 
 Please see the [Session Cookie Configuration](#session-cookie-configuration) section
 
+### Begin a Puzzle
+
+`begin` fetches the puzzle input and generates boilerplate files with the following structure:
+
+```
+<day_number>/
+  solution.py
+  input.txt
+```
+
 ```bash
 # fetch input and generate boilerplate for today's challenge
 $ aocpy begin
 
 # fetch input and generate boilerplate for a specific puzzle
 $ aocpy begin 2017 15
+```
 
+### Submit Puzzle Answers
+
+```bash
 # submit answer for level 1 of today's puzzle
 $ aocpy submit "myanswer" 1
 
