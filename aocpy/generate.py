@@ -2,6 +2,7 @@ from os import makedirs
 from os.path import dirname, exists, join
 from shutil import copyfile
 
+from aocpy.exception import AocpyException
 from aocpy.puzzle import Puzzle
 
 
@@ -10,7 +11,7 @@ def generate_day(puzzle: Puzzle):
     solution_fname = join(solution_dirname, "solution.py")
 
     if exists(solution_fname):
-        raise Exception(f"day {puzzle.day:02} already found")
+        raise AocpyException(f"day {puzzle.day:02} already found")
 
     makedirs(solution_dirname, exist_ok=True)
 

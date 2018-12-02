@@ -5,6 +5,12 @@ import webbrowser
 import requests
 from bs4 import BeautifulSoup
 
+from aocpy.exception import (
+    AocpyException,
+    RepeatSubmissionError,
+    IncorrectSubmissionError,
+    RateLimitError,
+)
 from aocpy.utils import current_day, current_year
 
 logger = logging.getLogger(__name__)
@@ -68,23 +74,18 @@ class Puzzle:
         if not r.ok:
             logger.error(f"got {r.status_code} status code")
             logger.error(r.content)
-            raise Exception(f"Non-200 response for POST: {r}")
+            raise AocpyException(f"Non-200 response for POST: {r}")
 
         soup = BeautifulSoup(r.text, "html.parser")
         message = soup.article.text
         if "Thats the right answer!" in message:
             webbrowser.open(r.url)
-        elif any(
-            [
-                s in message
-                for s in [
-                    "Did you already complete it",
-                    "That's not the right answer",
-                    "You gave an answer too recently",
-                ]
-            ]
-        ):
-            print(message)
+        elif "Did you already complete it" in message:
+            raise RepeatSubmissionError(message, answer, level, self.year, self.day)
+        elif "That's not the right answer" in message:
+            raise IncorrectSubmissionError(message, answer, level, self.year, self.day)
+        elif "You gave an answer too recently" in message:
+            raise RateLimitError(message, answer, level, self.year, self.day)
         return r
 
     def _fetch_input(self):
@@ -93,7 +94,7 @@ class Puzzle:
             msg = f"got {r.status_code} fetching day {self.day} year {self.year}"
             logger.error(msg)
             logger.error(r.content)
-            raise Exception(msg)
+            raise AocpyException(msg)
 
         data = r.text.rstrip("\r\r")
 

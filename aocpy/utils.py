@@ -3,6 +3,8 @@ from datetime import datetime
 
 import pytz
 
+from aocpy.exception import AocpyException
+
 AOC_TZ = pytz.timezone("America/New_York")
 CONFIG_DIRNAME = os.path.expanduser("~/.config/aocpy")
 
@@ -22,7 +24,7 @@ def current_day():
     """
     now = datetime.now(tz=AOC_TZ)
     if now.month != 12:
-        raise Exception("must be December")
+        raise AocpyException("must be December")
 
     return min(now.day, 25)
 
@@ -39,4 +41,4 @@ def get_session_cookie():
     if cookie:
         return cookie
 
-    raise Exception("unable to get AOC session cookie")
+    raise AocpyException("unable to get AOC session cookie")
