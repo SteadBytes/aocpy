@@ -33,8 +33,10 @@ def begin(year, day, session_cookie):
 
 
 @cli.command()
-@click.argument("year", type=click.INT)
-@click.argument("day", type=click.IntRange(1, 25))
+@click.argument("answer")
+@click.argument("level", type=click.IntRange(1, 2))
+@click.option("-y", "--year", default=current_year, type=click.INT)
+@click.option("-d", "--day", default=current_day, type=click.IntRange(1, 25))
 @click.option(
     "-c",
     "--session-cookie",
@@ -42,9 +44,9 @@ def begin(year, day, session_cookie):
     type=click.STRING,
     envvar="AOC_SESSION_COOKIE",
 )
-def init(year, day, session_cookie):
+def submit(answer, level, year, day, session_cookie):
     p = Puzzle(year, day, session_cookie)
-    init_day(p)
+    p.submit(answer, level)
 
 
 if __name__ == "__main__":
