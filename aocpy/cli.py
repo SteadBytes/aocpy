@@ -1,5 +1,10 @@
 import click
 
+from aocpy.exception import (
+    RepeatSubmissionError,
+    IncorrectSubmissionError,
+    RateLimitError,
+)
 from aocpy.generate import generate_day
 from aocpy.puzzle import Puzzle
 from aocpy.utils import current_day, current_year, get_session_cookie
@@ -46,7 +51,14 @@ def begin(year, day, session_cookie):
 )
 def submit(answer, level, year, day, session_cookie):
     p = Puzzle(year, day, session_cookie)
-    p.submit(answer, level)
+    try:
+        p.submit(answer, level)
+    except RepeatSubmissionError as err:
+        click.echo(f"{p} level {err.level} is already complete")
+    except IncorrectSubmissionError as err:
+        click.echo(f"Incorrect answer {err.answer} for {p} level {err.level}")
+    except RateLimitError as err:
+        click.echo(err)
 
 
 if __name__ == "__main__":
