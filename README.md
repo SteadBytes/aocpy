@@ -30,7 +30,8 @@ Install via pip:
 $ aocpy begin
 
 # fetch input and generate boilerplate for a specific puzzle
-$ aocpy begin 2017 15
+$ aocpy begin -y 2017 -d 15
+$ aocpy begin -d 15 # uses current puzzle year
 ```
 
 ### Submit Puzzle Answers
@@ -43,10 +44,10 @@ $ aocpy submit "myanswer" 1
 $ aocpy submit "myanswer2" 2
 
 # submit answer for level 1 of a specific puzzle
-$ aocpy submit "myanswer" 1 2017 15
+$ aocpy submit "myanswer" 1 -y 2017 -d 15
 
 # submit answer for level 2 of a specific puzzle
-$ aocpy submit "myanswer2" 2 2017 15
+$ aocpy submit "myanswer2" 2 -y 2017 -d 15
 ```
 
 ## Session Cookie Configuration
