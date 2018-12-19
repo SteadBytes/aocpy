@@ -1,12 +1,19 @@
 # aocpy - Advent of Code Automation Tool
 
+[![PyPI version shields.io](https://img.shields.io/pypi/v/aocpy.svg)](https://pypi.python.org/pypi/aocpy/)
+
 Fetch input, submit answers and generate boilerplate files for solving Advent of Code puzzles :christmas_tree:
 
 **Work in progress - API is likely to change**
 
+## Installation
+
+Install via pip:
+`pip install aocpy`
+
 ## Usage
 
-Please see the [Session Cookie Configuration](#session-cookie-configuration) section
+**N.B** Please see the [Session Cookie Configuration](#session-cookie-configuration) section
 
 ### Begin a Puzzle
 
