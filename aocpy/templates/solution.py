@@ -13,5 +13,8 @@ def main(puzzle_input_f):
 
 
 if __name__ == "__main__":
-    with open("input.txt") as f:
+    import os
+
+    base_dir = os.path.dirname(__file__)
+    with open(os.path.join(base_dir, "input.txt")) as f:
         main(f)
