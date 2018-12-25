@@ -15,7 +15,7 @@ AUTHOR = "Ben Steadman"
 REQUIRES_PYTHON = ">=3.6.0"
 VERSION = "0.0.3"
 
-REQUIRED = ["requests", "beautifulsoup4", "pytz"]
+REQUIRED = ["requests", "beautifulsoup4", "click", "pytz"]
 
 here = os.path.abspath(os.path.dirname(__file__))
 
