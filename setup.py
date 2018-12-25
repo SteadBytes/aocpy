@@ -13,7 +13,7 @@ URL = "https://github.com/SteadBytes/aocpy"
 EMAIL = "steadmanben1@gmail.com"
 AUTHOR = "Ben Steadman"
 REQUIRES_PYTHON = ">=3.6.0"
-VERSION = "0.0.4"
+VERSION = "0.0.1"
 
 REQUIRED = ["requests", "beautifulsoup4", "click", "pytz"]
 
