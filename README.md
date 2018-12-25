@@ -4,8 +4,6 @@
 
 Fetch input, submit answers and generate boilerplate files for solving Advent of Code puzzles :christmas_tree:
 
-**Work in progress - API is likely to change**
-
 ## Installation
 
 Install via pip:
@@ -50,6 +48,23 @@ $ aocpy submit "myanswer" 1 -y 2017 -d 15
 $ aocpy submit "myanswer2" 2 -y 2017 -d 15
 ```
 
+### Running Solutions
+
+The solution template files include a small CLI to read input files.
+
+```bash
+$ cd <puzzle_day_dir>
+
+# Default - run with aocpy generated input.txt file
+$ python solution.py
+
+# Run with example_input.txt if present
+$ python solution.py -e
+
+# Run with specified input file
+$ python solution.py /path/to/my/file.txt
+```
+
 ## Session Cookie Configuration
 
 AoC puzzle inputs differ by user, requiring a browser cookie to determine the current user. `aocpy` requires this cookie and can be supplied in several ways:
@@ -57,9 +72,9 @@ AoC puzzle inputs differ by user, requiring a browser cookie to determine the cu
 - CLI `-c`/`--session-cookie` option (supported by all commands):
   - `$ aocpy begin -c <1234mycookie>`
 - Configuration file:
-  - Paste the cookie into a file at `~/.config/aocd/token`
+  - Paste the cookie into a file at `~/.config/aocpy/token`
   ```
-  # ~/.config/aocd/token
+  # ~/.config/aocpy/token
   <1234mycookie>
   ```
 - Environment variable:
