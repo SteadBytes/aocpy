@@ -17,4 +17,5 @@ if __name__ == "__main__":
     from aocpy import input_cli
 
     base_dir = os.path.dirname(__file__)
-    main(input_cli(base_dir))
+    with input_cli(base_dir) as f:
+        main(f)

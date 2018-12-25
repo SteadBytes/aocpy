@@ -18,7 +18,6 @@ def input_cli(base_dir):
     )
     args = parser.parse_args()
     if args.example:
-        with open(os.path.join(base_dir, "example_input.txt")) as f:
-            return f
+        return open(os.path.join(base_dir, "example_input.txt"))
     else:
         return args.infile
