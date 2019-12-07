@@ -12,7 +12,7 @@ from aocpy.utils import current_day, current_year, get_session_cookie
 
 def begin_day(p: Puzzle):
     click.echo(f"Initialising {p.year}, day {p.day:02} puzzle...")
-    generate_day(p)
+    generate_day(p.day, p.puzzle_input)
     click.echo("Opening puzzle page in browser...")
     p.browse()
 
