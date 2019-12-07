@@ -7,9 +7,9 @@ from bs4 import BeautifulSoup
 
 from aocpy.exception import (
     AocpyException,
-    RepeatSubmissionError,
     IncorrectSubmissionError,
     RateLimitError,
+    RepeatSubmissionError,
 )
 from aocpy.utils import current_day, current_year
 
@@ -81,11 +81,11 @@ class Puzzle:
         if "Thats the right answer!" in message:
             webbrowser.open(r.url)
         elif "Did you already complete it" in message:
-            raise RepeatSubmissionError(message, answer, level, self.year, self.day)
+            raise RepeatSubmissionError(message)
         elif "That's not the right answer" in message:
-            raise IncorrectSubmissionError(message, answer, level, self.year, self.day)
+            raise IncorrectSubmissionError(message)
         elif "You gave an answer too recently" in message:
-            raise RateLimitError(message, answer, level, self.year, self.day)
+            raise RateLimitError(message)
         return r
 
     def _fetch_input(self):

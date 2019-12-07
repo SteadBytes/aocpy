@@ -53,10 +53,10 @@ def submit(answer, level, year, day, session_cookie):
     p = Puzzle(year, day, session_cookie)
     try:
         p.submit(answer, level)
-    except RepeatSubmissionError as err:
-        click.echo(f"{p} level {err.level} is already complete")
-    except IncorrectSubmissionError as err:
-        click.echo(f"Incorrect answer {err.answer} for {p} level {err.level}")
+    except RepeatSubmissionError:
+        click.echo(f"{p} level {level} is already complete")
+    except IncorrectSubmissionError:
+        click.echo(f"Incorrect answer {answer} for {p} level {level}")
     except RateLimitError as err:
         click.echo(err)
 
