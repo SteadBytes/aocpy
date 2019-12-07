@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 
 from aocpy.exception import (
     AocpyException,
+    SubmissionError,
     IncorrectSubmissionError,
     RateLimitError,
     RepeatSubmissionError,
@@ -18,6 +19,20 @@ logger = logging.getLogger(__name__)
 URL = "https://adventofcode.com/{year}/day/{day}"
 INPUT_FNAME = "{session_cookie}/{year}/{day}.txt"
 GLOBAL_CACHE_DIR = os.path.expanduser("~/.config/aocd")
+
+
+def check_submission_response_text(text: str):
+    soup = BeautifulSoup(text, "html.parser")
+    message = soup.article.text
+    if "Thats the right answer!" in message:
+        return True
+    elif "Did you already complete it" in message:
+        raise RepeatSubmissionError(message)
+    elif "That's not the right answer" in message:
+        raise IncorrectSubmissionError(message)
+    elif "You gave an answer too recently" in message:
+        raise RateLimitError(message)
+    return False
 
 
 class Puzzle:
@@ -75,18 +90,10 @@ class Puzzle:
             logger.error(f"got {r.status_code} status code")
             logger.error(r.content)
             raise AocpyException(f"Non-200 response for POST: {r}")
-
-        soup = BeautifulSoup(r.text, "html.parser")
-        message = soup.article.text
-        if "Thats the right answer!" in message:
+        elif check_submission_response_text(r.text):
             webbrowser.open(r.url)
-        elif "Did you already complete it" in message:
-            raise RepeatSubmissionError(message)
-        elif "That's not the right answer" in message:
-            raise IncorrectSubmissionError(message)
-        elif "You gave an answer too recently" in message:
-            raise RateLimitError(message)
-        return r
+        else:
+            raise SubmissionError(f"Unable to parse submission response: {r}")
 
     def _fetch_input(self):
         r = requests.get(self.url + "/input", cookies={"session": self.session_cookie})
