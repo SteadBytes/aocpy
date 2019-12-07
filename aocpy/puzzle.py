@@ -5,13 +5,9 @@ import webbrowser
 import requests
 from bs4 import BeautifulSoup
 
-from aocpy.exception import (
-    AocpyException,
-    SubmissionError,
-    IncorrectSubmissionError,
-    RateLimitError,
-    RepeatSubmissionError,
-)
+from aocpy.exception import (AocpyException, IncorrectSubmissionError,
+                             RateLimitError, RepeatSubmissionError,
+                             SubmissionError)
 from aocpy.utils import current_day, current_year
 
 logger = logging.getLogger(__name__)
@@ -35,21 +31,44 @@ def check_submission_response_text(text: str):
     return False
 
 
+def _fetch_puzzle_input(year, day, session_cookie):
+    url = URL.format(year=year, day=day) + "/input"
+    r = requests.get(url, cookies={"session": session_cookie})
+    if not r.ok:
+        msg = f"got {r.status_code} fetching day {day} year {year}"
+        logger.error(msg)
+        logger.error(r.content)
+        raise AocpyException(msg)
+
+    return r.text.rstrip("\r\r")
+
+
+def _puzzle_input_path(year, day, session_cookie, global_cache: bool):
+    fname = INPUT_FNAME.format(session_cookie=session_cookie, year=year, day=day)
+    return os.path.join(GLOBAL_CACHE_DIR if global_cache else "", fname)
+
+
+def get_puzzle_input(year, day, session_cookie, global_cache=True):
+    path = _puzzle_input_path(year, day, session_cookie, global_cache=global_cache)
+    if os.path.isfile(path):
+        with open(path) as f:
+            return f.read()
+    else:
+        puzzle_input = _fetch_puzzle_input()
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as f:
+            f.write(puzzle_input)
+        return puzzle_input
+
+
 class Puzzle:
     def __init__(self, year, day, session_cookie, global_cache=True):
         self.year = year
         self.day = day
         self.session_cookie = session_cookie
+        self.global_cache = global_cache
 
         self.url = URL.format(year=year, day=day)
-
-        input_fname = INPUT_FNAME.format(
-            session_cookie=session_cookie, year=year, day=day
-        )
-        self.input_fname = os.path.join(
-            GLOBAL_CACHE_DIR if global_cache else "", input_fname
-        )
-        self.is_input_cached = os.path.isfile(self.input_fname)
 
     def __str__(self):
         return f"Puzzle Day {self.day}, {self.year}"
@@ -70,11 +89,12 @@ class Puzzle:
 
     @property
     def puzzle_input(self):
-        if self.is_input_cached:
-            with open(self.input_fname) as f:
-                return f.read()
-        else:
-            return self._fetch_input()
+        return get_puzzle_input(
+            self.year,
+            self.day,
+            session_cookie=self.session_cookie,
+            global_cache=self.global_cache,
+        )
 
     def submit(self, answer, level):
         if level not in [1, 2, "1", "2"]:
@@ -94,24 +114,3 @@ class Puzzle:
             webbrowser.open(r.url)
         else:
             raise SubmissionError(f"Unable to parse submission response: {r}")
-
-    def _fetch_input(self):
-        r = requests.get(self.url + "/input", cookies={"session": self.session_cookie})
-        if not r.ok:
-            msg = f"got {r.status_code} fetching day {self.day} year {self.year}"
-            logger.error(msg)
-            logger.error(r.content)
-            raise AocpyException(msg)
-
-        data = r.text.rstrip("\r\r")
-
-        if not self.is_input_cached:
-            self._cache_input(data)
-
-        return data
-
-    def _cache_input(self, puzzle_input):
-        os.makedirs(os.path.dirname(self.input_fname), exist_ok=True)
-        logger.info(f"caching puzzle input for {self}")
-        with open(self.input_fname, "w") as f:
-            f.write(puzzle_input)
