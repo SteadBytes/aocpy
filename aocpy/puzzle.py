@@ -1,15 +1,12 @@
 import logging
 import os
-import webbrowser
-
-# TODO: Remove repeated parameter passing (NamedTuple?)
 from dataclasses import dataclass, field
+from typing import TypeVar
 
-import requests
 from bs4 import BeautifulSoup
 
+from aocpy import web
 from aocpy.exception import (
-    AocpyException,
     IncorrectSubmissionError,
     RateLimitError,
     RepeatSubmissionError,
@@ -24,122 +21,60 @@ INPUT_FNAME = "{session_cookie}/{year}/{day}.txt"
 GLOBAL_CACHE_DIR = os.path.expanduser("~/.config/aocd")
 
 
-def session(session_cookie):
-    s = requests.Session()
-    s.cookies["session"] = session_cookie
-    return s
+T = TypeVar("T", bound="Puzzle")
 
 
-@dataclass
-class PuzzleData:
+@dataclass(frozen=True)
+class Puzzle:
     year: int
     day: int
     session_cookie: str
     url: str = field(init=False)
+    input_fname: str = field(init=False)
 
     def __post_init__(self):
-        setattr(self, "url", URL.format(year=self.year, day=self.day))
-
-
-def check_submission_response_text(text: str):
-    soup = BeautifulSoup(text, "html.parser")
-    message = soup.article.text
-    if "Thats the right answer!" in message:
-        return True
-    elif "Did you already complete it" in message:
-        raise RepeatSubmissionError(message)
-    elif "That's not the right answer" in message:
-        raise IncorrectSubmissionError(message)
-    elif "You gave an answer too recently" in message:
-        raise RateLimitError(message)
-    return False
-
-
-def _fetch_puzzle_input(session, year, day):
-    url = URL.format(year=year, day=day) + "/input"
-    r = session.get(url)
-    if not r.ok:
-        msg = f"got {r.status_code} fetching day {day} year {year}"
-        logger.error(msg)
-        logger.error(r.content)
-        raise AocpyException(msg)
-
-    return r.text.rstrip("\r\r")
-
-
-def _puzzle_input_path(year, day, session_cookie, global_cache: bool):
-    fname = INPUT_FNAME.format(session_cookie=session_cookie, year=year, day=day)
-    return os.path.join(GLOBAL_CACHE_DIR if global_cache else "", fname)
-
-
-def get_puzzle_input(session, year, day, session_cookie, global_cache=True):
-    path = _puzzle_input_path(year, day, session_cookie, global_cache=global_cache)
-    if os.path.isfile(path):
-        with open(path) as f:
-            return f.read()
-    else:
-        puzzle_input = _fetch_puzzle_input(session, year, day)
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w") as f:
-            f.write(puzzle_input)
-        return puzzle_input
-
-
-def submit_answer(session, answer, level, year, day):
-    if level not in [1, 2, "1", "2"]:
-        raise ValueError("Submit level must be 1 or 2")
-    url = URL.format(year=year, day=day) + "/answer"
-
-    r = session.post(url, data={"level": level, "answer": answer},)
-    if not r.ok:
-        logger.error(f"got {r.status_code} status code")
-        logger.error(r.content)
-        raise AocpyException(f"Non-200 response for POST: {r}")
-    return r.text, r.url
-
-
-class Puzzle:
-    def __init__(self, year, day, session_cookie, global_cache=True):
-        self.year = year
-        self.day = day
-        self.session_cookie = session_cookie
-        self.global_cache = global_cache
-
-        self.url = URL.format(year=year, day=day)
-        self.session = session(session_cookie)
-
-    def __str__(self):
-        return f"Puzzle Day {self.day}, {self.year}"
-
-    def __repr__(self):
-        return f"Puzzle({self.year}, {self.day}, {self.session_cookie})"
-
-    def browse(self):
-        webbrowser.open(self.url)
+        object.__setattr__(self, "url", URL.format(year=self.year, day=self.day))
+        object.__setattr__(
+            self,
+            "input_fname",
+            os.path.join(
+                GLOBAL_CACHE_DIR,
+                INPUT_FNAME.format(
+                    session_cookie=self.session_cookie, year=self.year, day=self.day
+                ),
+            ),
+        )
 
     @staticmethod
-    def today(session_cookie):
+    def today(session_cookie: str) -> T:
         """ Create a Puzzle instance for the current day.
         """
         year = current_year()
         day = current_day()
         return Puzzle(year, day, session_cookie)
 
-    @property
-    def puzzle_input(self):
-        return get_puzzle_input(
-            self.session,
-            self.year,
-            self.day,
-            session_cookie=self.session_cookie,
-            global_cache=self.global_cache,
-        )
 
-    def submit(self, answer, level):
-        text, redirect_url = submit_answer(
-            self.session, answer, level, self.year, self.day
-        )
-        if check_submission_response_text(text):
-            webbrowser.open(redirect_url)
-        else:
-            raise SubmissionError(f"Unable to parse submission response text: {text}")
+def check_submission_response_text(text: str):
+    soup = BeautifulSoup(text, "html.parser")
+    message = soup.article.text
+    if "Thats the right answer!" in message:
+        return
+    elif "Did you already complete it" in message:
+        raise RepeatSubmissionError(message)
+    elif "That's not the right answer" in message:
+        raise IncorrectSubmissionError(message)
+    elif "You gave an answer too recently" in message:
+        raise RateLimitError(message)
+    raise SubmissionError(f"Unable to parse submission response text: {text}")
+
+
+def get_puzzle_input(session: web.AuthSession, puzzle: Puzzle):
+    if os.path.isfile(puzzle.input_fname):
+        with open(puzzle.input_fname) as f:
+            return f.read()
+    else:
+        puzzle_input = web.fetch_puzzle_input(session, puzzle.url)
+        os.makedirs(os.path.dirname(puzzle.input_fname), exist_ok=True)
+        with open(puzzle.input_fname, "w") as f:
+            f.write(puzzle_input)
+        return puzzle_input
