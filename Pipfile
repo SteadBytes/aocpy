@@ -9,6 +9,9 @@ pep8 = "*"
 pylint = "*"
 rope = "*"
 twine = "*"
+pytest = "*"
+hypothesis = "*"
+freezegun = "*"
 
 [packages]
 requests = "*"
