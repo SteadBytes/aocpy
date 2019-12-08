@@ -56,16 +56,21 @@ class Puzzle:
 
 def check_submission_response_text(text: str):
     soup = BeautifulSoup(text, "html.parser")
-    message = soup.article.text
-    if "Thats the right answer!" in message:
-        return
-    elif "Did you already complete it" in message:
-        raise RepeatSubmissionError(message)
-    elif "That's not the right answer" in message:
-        raise IncorrectSubmissionError(message)
-    elif "You gave an answer too recently" in message:
-        raise RateLimitError(message)
-    raise SubmissionError(f"Unable to parse submission response text: {text}")
+    try:
+        message = soup.article.text
+    except AttributeError:
+        raise SubmissionError(f"Unable to parse submission response text: {text}")
+    else:
+        if "Thats the right answer!" in message:
+            return
+        elif "Did you already complete it" in message:
+            raise RepeatSubmissionError(message)
+        elif "That's not the right answer" in message:
+            raise IncorrectSubmissionError(message)
+        elif "You gave an answer too recently" in message:
+            raise RateLimitError(message)
+        else:
+            raise SubmissionError(f"Unable to parse submission response text: {text}")
 
 
 def get_puzzle_input(session: web.AuthSession, puzzle: Puzzle):

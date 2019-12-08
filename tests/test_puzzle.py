@@ -9,8 +9,16 @@ from freezegun import freeze_time
 from hypothesis import given
 from hypothesis import strategies as st
 
-from aocpy.exception import AocpyException
-from aocpy.puzzle import Puzzle
+from aocpy.exception import (
+    AocpyException,
+    IncorrectSubmissionError,
+    RateLimitError,
+    RepeatSubmissionError,
+    SubmissionError,
+)
+from aocpy.puzzle import Puzzle, check_submission_response_text
+
+TEST_DATA_DIR = Path(__file__).resolve().parent / "data"
 
 cookie_strategy = st.text(
     alphabet=st.sampled_from(ascii_letters + digits), min_size=96, max_size=96,
@@ -48,7 +56,7 @@ def test_puzzle_input_fname(p_data):
 def test_puzzle_today(year, day, cookie):
     date = datetime.datetime(
         year, 12, day, hour=1, tzinfo=pytz.timezone("America/New_York")
-)
+    )
     with freeze_time(date):
         p = Puzzle.today(cookie)
         assert p.year == date.year
@@ -66,3 +74,28 @@ def test_puzzle_today_raises_when_not_december(date, cookie):
     with freeze_time(date):
         with pytest.raises(AocpyException):
             Puzzle.today(cookie)
+
+
+def test_check_submission_response_text_correct():
+    resp_text = (TEST_DATA_DIR / "submission-responses/correct.html").read_text()
+    check_submission_response_text(resp_text)
+
+
+@pytest.mark.parametrize(
+    "fname,exc_cls",
+    [
+        ("already_complete.html", RepeatSubmissionError),
+        ("incorrect.html", IncorrectSubmissionError),
+        ("rate_limit.html", RateLimitError),
+    ],
+)
+def test_check_submission_response_raises_on_known_failures(fname, exc_cls):
+    resp_text = (TEST_DATA_DIR / "submission-responses" / fname).read_text()
+    with pytest.raises(exc_cls):
+        check_submission_response_text(resp_text)
+
+
+@given(st.text())
+def test_check_submission_response_raises_on_failure(text):
+    with pytest.raises(SubmissionError):
+        check_submission_response_text(text)
