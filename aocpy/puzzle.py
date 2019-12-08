@@ -5,9 +5,13 @@ import webbrowser
 import requests
 from bs4 import BeautifulSoup
 
-from aocpy.exception import (AocpyException, IncorrectSubmissionError,
-                             RateLimitError, RepeatSubmissionError,
-                             SubmissionError)
+from aocpy.exception import (
+    AocpyException,
+    IncorrectSubmissionError,
+    RateLimitError,
+    RepeatSubmissionError,
+    SubmissionError,
+)
 from aocpy.utils import current_day, current_year
 
 logger = logging.getLogger(__name__)
@@ -15,6 +19,8 @@ logger = logging.getLogger(__name__)
 URL = "https://adventofcode.com/{year}/day/{day}"
 INPUT_FNAME = "{session_cookie}/{year}/{day}.txt"
 GLOBAL_CACHE_DIR = os.path.expanduser("~/.config/aocd")
+
+# TODO: Remove repeated parameter passing (NamedTuple?)
 
 
 def check_submission_response_text(text: str):
@@ -61,6 +67,22 @@ def get_puzzle_input(year, day, session_cookie, global_cache=True):
         return puzzle_input
 
 
+def submit_answer(answer, level, year, day, session_cookie):
+    if level not in [1, 2, "1", "2"]:
+        raise ValueError("Submit level must be 1 or 2")
+    url = URL.format(year=year, day=day) + "/answer"
+    r = requests.post(
+        url,
+        cookies={"session": session_cookie},
+        data={"level": level, "answer": answer},
+    )
+    if not r.ok:
+        logger.error(f"got {r.status_code} status code")
+        logger.error(r.content)
+        raise AocpyException(f"Non-200 response for POST: {r}")
+    return r.text, r.url
+
+
 class Puzzle:
     def __init__(self, year, day, session_cookie, global_cache=True):
         self.year = year
@@ -97,20 +119,10 @@ class Puzzle:
         )
 
     def submit(self, answer, level):
-        if level not in [1, 2, "1", "2"]:
-            raise Exception("submit level must be 1 or 2")
-
-        r = requests.post(
-            self.url + "/answer",
-            cookies={"session": self.session_cookie},
-            data={"level": level, "answer": answer},
+        text, redirect_url = submit_answer(
+            answer, level, self.year, self.day, self.session_cookie
         )
-
-        if not r.ok:
-            logger.error(f"got {r.status_code} status code")
-            logger.error(r.content)
-            raise AocpyException(f"Non-200 response for POST: {r}")
-        elif check_submission_response_text(r.text):
-            webbrowser.open(r.url)
+        if check_submission_response_text(text):
+            webbrowser.open(redirect_url)
         else:
-            raise SubmissionError(f"Unable to parse submission response: {r}")
+            raise SubmissionError(f"Unable to parse submission response text: {text}")
