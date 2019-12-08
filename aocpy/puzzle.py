@@ -2,6 +2,9 @@ import logging
 import os
 import webbrowser
 
+# TODO: Remove repeated parameter passing (NamedTuple?)
+from dataclasses import dataclass, field
+
 import requests
 from bs4 import BeautifulSoup
 
@@ -20,7 +23,22 @@ URL = "https://adventofcode.com/{year}/day/{day}"
 INPUT_FNAME = "{session_cookie}/{year}/{day}.txt"
 GLOBAL_CACHE_DIR = os.path.expanduser("~/.config/aocd")
 
-# TODO: Remove repeated parameter passing (NamedTuple?)
+
+def session(session_cookie):
+    s = requests.Session()
+    s.cookies["session"] = session_cookie
+    return s
+
+
+@dataclass
+class PuzzleData:
+    year: int
+    day: int
+    session_cookie: str
+    url: str = field(init=False)
+
+    def __post_init__(self):
+        setattr(self, "url", URL.format(year=self.year, day=self.day))
 
 
 def check_submission_response_text(text: str):
@@ -37,9 +55,9 @@ def check_submission_response_text(text: str):
     return False
 
 
-def _fetch_puzzle_input(year, day, session_cookie):
+def _fetch_puzzle_input(session, year, day):
     url = URL.format(year=year, day=day) + "/input"
-    r = requests.get(url, cookies={"session": session_cookie})
+    r = session.get(url)
     if not r.ok:
         msg = f"got {r.status_code} fetching day {day} year {year}"
         logger.error(msg)
@@ -54,28 +72,25 @@ def _puzzle_input_path(year, day, session_cookie, global_cache: bool):
     return os.path.join(GLOBAL_CACHE_DIR if global_cache else "", fname)
 
 
-def get_puzzle_input(year, day, session_cookie, global_cache=True):
+def get_puzzle_input(session, year, day, session_cookie, global_cache=True):
     path = _puzzle_input_path(year, day, session_cookie, global_cache=global_cache)
     if os.path.isfile(path):
         with open(path) as f:
             return f.read()
     else:
-        puzzle_input = _fetch_puzzle_input()
+        puzzle_input = _fetch_puzzle_input(session, year, day)
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as f:
             f.write(puzzle_input)
         return puzzle_input
 
 
-def submit_answer(answer, level, year, day, session_cookie):
+def submit_answer(session, answer, level, year, day):
     if level not in [1, 2, "1", "2"]:
         raise ValueError("Submit level must be 1 or 2")
     url = URL.format(year=year, day=day) + "/answer"
-    r = requests.post(
-        url,
-        cookies={"session": session_cookie},
-        data={"level": level, "answer": answer},
-    )
+
+    r = session.post(url, data={"level": level, "answer": answer},)
     if not r.ok:
         logger.error(f"got {r.status_code} status code")
         logger.error(r.content)
@@ -91,6 +106,7 @@ class Puzzle:
         self.global_cache = global_cache
 
         self.url = URL.format(year=year, day=day)
+        self.session = session(session_cookie)
 
     def __str__(self):
         return f"Puzzle Day {self.day}, {self.year}"
@@ -112,6 +128,7 @@ class Puzzle:
     @property
     def puzzle_input(self):
         return get_puzzle_input(
+            self.session,
             self.year,
             self.day,
             session_cookie=self.session_cookie,
@@ -120,7 +137,7 @@ class Puzzle:
 
     def submit(self, answer, level):
         text, redirect_url = submit_answer(
-            answer, level, self.year, self.day, self.session_cookie
+            self.session, answer, level, self.year, self.day
         )
         if check_submission_response_text(text):
             webbrowser.open(redirect_url)
