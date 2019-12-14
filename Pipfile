@@ -4,11 +4,16 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-black = "*"
+black = "==19.10b0"
 pep8 = "*"
 pylint = "*"
 rope = "*"
 twine = "*"
+pytest = "*"
+hypothesis = "*"
+freezegun = "*"
+pytest-mock = "*"
+pytest-responses = "*"
 
 [packages]
 requests = "*"
@@ -18,4 +23,4 @@ click = "*"
 pytz = "*"
 
 [requires]
-python_version = "3.6"
+python_version = "3.7"

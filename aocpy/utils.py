@@ -6,7 +6,7 @@ import pytz
 from aocpy.exception import AocpyException
 
 AOC_TZ = pytz.timezone("America/New_York")
-CONFIG_DIRNAME = os.path.expanduser("~/.config/aocpy")
+CONFIG_DIRNAME = "~/.config/aocpy"
 
 
 def current_year():
@@ -18,9 +18,11 @@ def current_year():
 
 
 def current_day():
-    """ Returns the current day number
+    """ Returns the latest puzzle day number. Returns 25 if current day of month
+    is > 25.
 
-    Raises Exception if not currently December
+    Raises:
+        `AocpyException` if not currently December
     """
     now = datetime.now(tz=AOC_TZ)
     if now.month != 12:
@@ -34,9 +36,9 @@ def get_session_cookie():
     if cookie is not None:
         return cookie
     try:
-        with open(os.path.join(CONFIG_DIRNAME, "token")) as f:
+        with open(os.path.join(os.path.expanduser(CONFIG_DIRNAME), "token")) as f:
             cookie = f.read().strip()
-    except (OSError, IOError) as err:
+    except (OSError, IOError):
         pass
     if cookie:
         return cookie

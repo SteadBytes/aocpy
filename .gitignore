@@ -27,6 +27,12 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+# pytest
+.pytest_cache/
+
+# Hypothesis testing
+.hypothesis/
+
 env/
 
 
