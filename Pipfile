@@ -12,6 +12,8 @@ twine = "*"
 pytest = "*"
 hypothesis = "*"
 freezegun = "*"
+pytest-mock = "*"
+pytest-responses = "*"
 
 [packages]
 requests = "*"

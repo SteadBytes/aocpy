@@ -49,7 +49,7 @@ def test_puzzle_url(p_data):
 def test_puzzle_input_fname(p_data):
     puzzle, year, day, cookie = p_data
     p = Path(puzzle.input_fname)
-    assert p == Path().home() / f".config/aocd/{cookie}/{year}/{day}.txt"
+    assert p == Path().home() / f".config/aocd/{cookie}/{year}/{day:02}.txt"
 
 
 @given(year_strategy, day_strategy, cookie_strategy)

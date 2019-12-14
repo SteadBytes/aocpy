@@ -17,8 +17,8 @@ from aocpy.utils import current_day, current_year
 logger = logging.getLogger(__name__)
 
 URL = "https://adventofcode.com/{year}/day/{day}"
-INPUT_FNAME = "{session_cookie}/{year}/{day}.txt"
-GLOBAL_CACHE_DIR = os.path.expanduser("~/.config/aocd")
+INPUT_FNAME = "{session_cookie}/{year}/{day:02}.txt"
+GLOBAL_CACHE_DIR = "~/.config/aocd"
 
 
 T = TypeVar("T", bound="Puzzle")
@@ -38,7 +38,7 @@ class Puzzle:
             self,
             "input_fname",
             os.path.join(
-                GLOBAL_CACHE_DIR,
+                os.path.expanduser(GLOBAL_CACHE_DIR),
                 INPUT_FNAME.format(
                     session_cookie=self.session_cookie, year=self.year, day=self.day
                 ),
