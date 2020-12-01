@@ -17,6 +17,9 @@ def generate_day(day: int, puzzle_input: Iterable[str]):
 
     copyfile(join(dirname(__file__), "templates/solution.py"), solution_fname)
 
+    test_fname = join(solution_dirname, f"test_day{solution_dirname}.py")
+    copyfile(join(dirname(__file__), "templates/test_solution.py"), test_fname)
+
     puzzle_input_fname = join(solution_dirname, "input.txt")
     with open(puzzle_input_fname, "w") as f:
         f.write(puzzle_input)
