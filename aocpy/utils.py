@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from pathlib import Path
 
 import pytz
 
@@ -7,6 +8,14 @@ from aocpy.exception import AocpyException
 
 AOC_TZ = pytz.timezone("America/New_York")
 CONFIG_DIRNAME = "~/.config/aocpy"
+
+
+def get_config_dir():
+    return Path(os.path.expanduser(CONFIG_DIRNAME))
+
+
+def get_token_file():
+    return get_config_dir() / 'token'
 
 
 def current_year():
@@ -36,7 +45,7 @@ def get_session_cookie():
     if cookie is not None:
         return cookie
     try:
-        with open(os.path.join(os.path.expanduser(CONFIG_DIRNAME), "token")) as f:
+        with get_token_file().open() as f:
             cookie = f.read().strip()
     except (OSError, IOError):
         pass

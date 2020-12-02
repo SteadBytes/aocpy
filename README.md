@@ -73,12 +73,12 @@ AoC puzzle inputs differ by user, requiring a browser cookie to determine the cu
   - `$ aocpy begin -c <1234mycookie>`
 - Configuration file:
   - Paste the cookie into a file at `~/.config/aocpy/token`
-  ```
-  # ~/.config/aocpy/token
-  <1234mycookie>
-  ```
+      ```
+      # ~/.config/aocpy/token
+      <1234mycookie>
+      ```
+  - or set it via cli `aocpy set-cookie <1234mycookie>`
 - Environment variable:
-
   - `$ export AOC_SESSION_COOKIE=<1234mycookie>`
 
 ### Finding Your Session Cookie
