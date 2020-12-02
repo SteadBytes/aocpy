@@ -15,7 +15,7 @@ def get_config_dir():
 
 
 def get_token_file():
-    return get_config_dir() / 'token'
+    return get_config_dir() / "token"
 
 
 def current_year():
