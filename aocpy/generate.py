@@ -22,7 +22,7 @@ def generate_day(day: int, puzzle_input: Iterable[str]):
         copyfile(join(dirname(__file__), "templates/solution.py"), solution_fname)
 
     test_fname = join(solution_dirname, f"test_day{solution_dirname}.py")
-    if Path(".aocpy/solution.py").exists():
+    if Path(".aocpy/test_solution.py").exists():
         copyfile(str(Path(".aocpy/test_solution.py")), test_fname)
     else:
         copyfile(join(dirname(__file__), "templates/test_solution.py"), test_fname)
