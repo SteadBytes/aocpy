@@ -92,3 +92,26 @@ AoC puzzle inputs differ by user, requiring a browser cookie to determine the cu
 4. Navigate to any puzzle input page i.e. adventofcode.com/2018/day/1/input
 5. Click on the request that shows up in the `Network` tab
 6. The cookie will be in the `Request Headers` section with the format `Cookie: session=<1234mycookie>`
+
+## Use custom solution and test_solution templates
+
+You can override the default templates in a `.aocpy` folder.
+
+```
+.
+├── 01
+│   ├── input.txt
+│   ├── solution.py
+│   └── test_solution.py
+├── 02
+│   ├── input.txt
+│   ├── solution.py
+│   └── test_solution.py
+├── README.md
+├── poetry.lock
+├── pyproject.toml
+├── tinker_regex.py
+└── .aocpy
+    ├── solution.py         # override solution template
+    └── test_solution.py    # override test_solution template
+```
