@@ -14,7 +14,7 @@ from aocpy.puzzle import (
     check_submission_response_text,
     get_puzzle_input,
 )
-from aocpy.utils import current_day, current_year, get_session_cookie
+from aocpy.utils import current_day, current_year, get_session_cookie, get_config_dir, get_token_file
 
 
 def begin_day(session: web.AuthSession, p: Puzzle):
@@ -72,6 +72,14 @@ def submit(answer, level, year, day, session_cookie):
     except RateLimitError as err:
         # TODO: Clean up this error message - remove '[Return to Day 13]' line
         click.echo(err)
+
+
+@cli.command()
+@click.argument("cookie")
+def set_cookie(cookie):
+    get_config_dir().mkdir(exist_ok=True, parents=True)
+    get_token_file().write_text(cookie)
+    click.echo(f"Saved cookie in {get_token_file()}")
 
 
 if __name__ == "__main__":
