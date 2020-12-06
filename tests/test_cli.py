@@ -67,6 +67,23 @@ def test_begin(webbrowser_open, runner, cache_dir, responses):
         webbrowser_open.assert_called_once_with(puzzle_url)
 
 
+@freeze_time(datetime(2019, 12, 10, hour=1, tzinfo=pytz.timezone("America/New_York")))
+def test_begin_with_custom_template(webbrowser_open, runner, cache_dir, responses):
+    puzzle_url = "https://adventofcode.com/2019/day/10"
+    puzzle_input = "some text"
+    responses.add(responses.GET, puzzle_url + "/input", body=puzzle_input)
+    cookie = "12345"
+    with runner.isolated_filesystem() as p:
+        Path(".aocpy").mkdir()
+        Path(".aocpy/solution.py").write_text("print('Custom template')")
+        Path(".aocpy/test_solution.py").write_text("print('Custom test template')")
+
+        result = runner.invoke(cli, ["begin", "-c", cookie])
+        assert result.exit_code == 0
+        # Solution file used custom template
+        assert (p / "10/test_day10.py").read_text() == "print('Custom test template')"
+
+
 def test_set_cookie(runner, config_dir):
     cookie = "12345"
     with runner.isolated_filesystem() as p:
@@ -128,9 +145,7 @@ def test_begin_specify_day(day, webbrowser_open, runner, cache_dir, responses):
 
 @freeze_time(datetime(2019, 12, 25, hour=1, tzinfo=pytz.timezone("America/New_York")))
 @given(st.integers().filter(lambda x: not (1 <= x <= 25)))
-def test_begin_specify_fails_if_out_of_range(
-        webbrowser_open, runner, config_dir, day
-):
+def test_begin_specify_fails_if_out_of_range(webbrowser_open, runner, config_dir, day):
     cookie = "12345"
     with runner.isolated_filesystem():
         result = runner.invoke(cli, ["begin", "-d", day, "-c", cookie])
@@ -160,7 +175,7 @@ def test_begin_specify_year(year, webbrowser_open, runner, cache_dir, responses)
 @pytest.mark.parametrize("day", range(1, 25))
 @pytest.mark.parametrize("year", range(2015, 2019))
 def test_begin_specify_day_and_year(
-        year, day, webbrowser_open, runner, cache_dir, responses
+    year, day, webbrowser_open, runner, cache_dir, responses
 ):
     puzzle_url = f"https://adventofcode.com/{year}/day/{day}"
     puzzle_input = "some text"

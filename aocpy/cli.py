@@ -14,7 +14,13 @@ from aocpy.puzzle import (
     check_submission_response_text,
     get_puzzle_input,
 )
-from aocpy.utils import current_day, current_year, get_session_cookie, get_config_dir, get_token_file
+from aocpy.utils import (
+    current_day,
+    current_year,
+    get_session_cookie,
+    get_config_dir,
+    get_token_file,
+)
 
 
 def begin_day(session: web.AuthSession, p: Puzzle):

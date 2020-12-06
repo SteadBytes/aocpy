@@ -5,6 +5,9 @@ def part_1(data):
 def part_2(data):
     pass
 
+def parse_lines(lines):
+    return lines
+
 def main(puzzle_input_f):
     lines = [l.strip() for l in puzzle_input_f.readlines() if l]
     print("Part 1: ", part_1(lines))
